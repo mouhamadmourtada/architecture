@@ -30,17 +30,111 @@
 use controllers\ArticleController;
 use controllers\CategoryController;
 use models\domaine\Category;
-    use models\domaine\Article;
+use models\domaine\Article;
 
 
+$routes = [
+    [
+        "path" => "article",
+        "controller" => "controllers\ArticleController",
+        "children" =>
+        [
+            "" => "index",
+            "index" => "index",
+            "create" => "create",
+            "store" => "store",
+            "edit/{id}" => "edit",
+            "update/{id}" => "update",
+            "delete{id}" => "delete",
+            "show/{id}" => "show"
+        ]
+    ],
+    [
+        "path" => "category",
+        "controller" => "controllers\CategoryController",
+        "children" =>
+        [
+            "" => "index",
+            "index" => "index",
+            "show" => "show",
+            "create" => "create",
+            "store" => "store",
+            "edit" => "edit",
+            "update" => "update",
+            "delete" => "delete"
+        ]
+    ]
 
+];
+
+function findParams($route,  $routeElements, $index = 0) {
+    $params = [];
+
+    for($i = 1; $i < count($routeElements); $i++) {
+        
+        if(strpos($route['path'], '{') !== false) {
+            $params[] = $routeElements[$i];
+        }
+    }
+    return $params;
+}
+
+
+    $controller = null;
+    $action = "index";
+    $params = [];
 
     $categories = Category::all();
+    // echo $_SERVER['REQUEST_URI'];
 
-    if(isset($_GET['action'])) {
-        $articleController = new ArticleController();
+    $routeElements = explode('/', $_SERVER['REQUEST_URI']);
 
-        return $articleController->index();
+    // il faut parcours les routes
+    for($i = 1; $i < count($routeElements)-1; $i++) {
+        foreach($routes as $route) {
+
+            if($route['path'] == $routeElements[$i]) {
+                echo count( $routeElements );
+                echo '<br>';
+                echo $i;
+                $controller = $route['controller'];
+
+                $action = $route['children'][$routeElements[$i + 1]];
+                // if( count( $routeElements ) <= ($i) ) 
+                $params = findParams($route, $routeElements);               
+                break;
+            }
+        }
     }
-    echo "ngani"
+
+
+
+    if(!$controller) {
+        echo "404";
+        return;
+    }
+
+
+   $controller = new $controller();
+
+    // il faut trouver un moyen de passer en parametre les params
+
+    // $controller->$action();
+    call_user_func_array([$controller, $action], $params);
+
+    
+
+    // if(isset($_GET['action'])) {
+
+    //     // il faut retourner l'ur
+    //     // il faut afficher l'url
+    //     // comment recupérer l'url ?
+    //     echo $_SERVER['REQUEST_URI'];
+    //     return;
+
+    //     $articleController = new ArticleController();
+
+    //     return $articleController->index();
+    // }
+    // echo "ngani"
 ?>
