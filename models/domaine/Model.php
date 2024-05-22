@@ -1,15 +1,13 @@
 <?php
-namespace models;
+namespace models\domaine;
 use config\Connection;
 
 
 abstract class Model{
     protected $id;
     protected $table;
-    protected $db;
     
     public function __construct($id = null){
-        $this->db = Connection::getConnection();
         $this->id = $id;
         
     }
