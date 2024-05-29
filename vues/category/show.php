@@ -4,6 +4,7 @@ require "entete.php";
 
 ?>
 <div>
+    show category
 </div>
 
 <?php

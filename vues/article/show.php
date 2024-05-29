@@ -4,6 +4,7 @@ require "entete.php";
 
 ?>
 <div>
+    show article
 </div>
 
 <?php

@@ -1,6 +1,14 @@
-# RewriteEngine On
-# RewriteRule ^.*$ index.php [L]
-
 RewriteEngine On
+
+# En-têtes CORS pour les fichiers CSS
+<FilesMatch "\.(css)$">
+    <IfModule mod_headers.c>
+        Header set Access-Control-Allow-Origin "*"
+    </IfModule>
+</FilesMatch>
+
+# Ne pas rediriger les requêtes pour les fichiers statiques
+RewriteCond %{REQUEST_URI} !\.(css|js|png|jpg|jpeg|gif|ico|svg|webp)$ [NC]
 RewriteCond %{REQUEST_URI} !^/index\.php$
-RewriteRule ^(.*)$ index.php [QSA,L]
+RewriteRule ^(.*)$ index.php [QSD,L]
+

@@ -1,9 +1,8 @@
 
 <div>
-    from footer
 </div>
 <?php
 
-require 'vues/layout/footer.php';
+require 'vues/layout/base/footer.php';
 ?>
 

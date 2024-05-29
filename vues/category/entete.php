@@ -1,6 +1,6 @@
 <?php
 
-require 'vues/layout/entete.php';
+require 'vues/layout/base/entete.php';
 ?>
 <div>
 </div>

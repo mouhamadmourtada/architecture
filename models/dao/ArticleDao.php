@@ -38,19 +38,40 @@ class ArticleDao extends ModelDao {
         $req = $this->db->prepare("SELECT * FROM article WHERE categorie = :id");
         $req->bindParam(':id', $id);
         $req->execute();
-        $articles = $req->fetchAll();
+
+        $articles = [];
+        while($row = $req->fetch()) {
+            $article = new Article($row['id'], $row['titre'], $row['contenu'], $row['dateCreation'], $row['dateModification'], $row['categorie']);
+            $articles[] = $article;
+        }
         return $articles;
     }
 
 
 
+    // voici mes errerus para rapport à ce code 
+    // Notice: Only variables should be passed by reference in C:\Apache24\htdocs\design_pattern\models\dao\ArticleDao.php on line 54
+
+// Notice: Only variables should be passed by reference in C:\Apache24\htdocs\design_pattern\models\dao\ArticleDao.php on line 55
+
+// Notice: Only variables should be passed by reference in C:\Apache24\htdocs\design_pattern\models\dao\ArticleDao.php on line 56
+
+
+
     public function save(Article $article) {
+        $titre = $article->getTitre();
+        $contenu = $article->getContenu();
+        $categorie = $article->getCategorie()->getId();
+        $currentDate = date('Y-m-d H:i:s'); 
+
+
+
         $req = $this->db->prepare("INSERT INTO article (titre, contenu, dateCreation, dateModification, categorie) VALUES (:titre, :contenu, :dateCreation, :dateModification, :categorie)");
-        $req->bindParam(':titre', $article->getTitre());
-        $req->bindParam(':contenu', $article->getContenu());
+        $req->bindParam(':titre', $titre);
+        $req->bindParam(':contenu', $contenu);
         $req->bindParam(':dateCreation', $article->getDateCreation());
-        $req->bindParam(':dateModification', $article->getDateModification());
-        $req->bindParam(':categorie', $article->getCategorie()->getId());
+        $req->bindParam(':dateModification', $currentDate);
+        $req->bindParam(':categorie', $categorie);
         $req->execute();
     }
 

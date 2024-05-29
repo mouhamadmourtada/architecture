@@ -40,7 +40,7 @@ class CategoryController extends Controller {
             $this->redirect('category');
         }
     
-        public function delete($id) {
+        public function destroy($id) {
             $category = Category::find($id);
             $category->delete();
             $this->redirect('category');

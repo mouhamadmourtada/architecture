@@ -31,6 +31,8 @@ use controllers\ArticleController;
 use controllers\CategoryController;
 use models\domaine\Category;
 use models\domaine\Article;
+use exceptions\NotFound;
+use controllers\ExceptionController;
 
 
 $routes = [
@@ -43,98 +45,142 @@ $routes = [
             "index" => "index",
             "create" => "create",
             "store" => "store",
-            "edit/{id}" => "edit",
-            "update/{id}" => "update",
-            "delete{id}" => "delete",
-            "show/{id}" => "show"
+            "edit" => ["edit", 
+                "params" => ["id" => 1]
+            ],
+            "update" => ["update",
+                "params" => ["id" => 1]
+            ],
+            "delete" => ["destroy",
+                "params" => ["id" => 1],
+            ],
+            "show" => ["show",
+            
+                "params" => ["id" => 1]
+            ],
+            "articleCategorie" => ["articleCategorie",
+                "params" => ["categorie_id" => 1]
+            ]
         ]
     ],
     [
         "path" => "category",
-        "controller" => "controllers\CategoryController",
+        "controller" => CategoryController::class,
         "children" =>
         [
             "" => "index",
             "index" => "index",
-            "show" => "show",
             "create" => "create",
             "store" => "store",
-            "edit" => "edit",
-            "update" => "update",
-            "delete" => "delete"
+            "edit" => ["edit", 
+                "params" => ["id" => 1]
+            ],
+            "update" => ["update",
+                "params" => ["id" => 1]
+            ],
+            "delete" => ["destroy",
+                "params" => ["id" => 1],
+            ],
+            "show" => ["show",
+            
+                "params" => ["id" => 1]
+            ]
         ]
     ]
 
 ];
 
 function findParams($route,  $routeElements, $index = 0) {
-    $params = [];
-
-    for($i = 1; $i < count($routeElements); $i++) {
-        
-        if(strpos($route['path'], '{') !== false) {
-            $params[] = $routeElements[$i];
-        }
-    }
+    $params = $route["params"];
+    $params = array_slice($routeElements, $index);
     return $params;
+    
 }
+
 
 
     $controller = null;
     $action = "index";
     $params = [];
 
-    $categories = Category::all();
-    // echo $_SERVER['REQUEST_URI'];
 
     $routeElements = explode('/', $_SERVER['REQUEST_URI']);
+    if($routeElements[count($routeElements) - 1] == "") {
+        array_pop($routeElements);
+    }
 
-    // il faut parcours les routes
-    for($i = 1; $i < count($routeElements)-1; $i++) {
-        foreach($routes as $route) {
+   
+    function findControllerActionParams($routeElements, $routes) {
+        $controller = null;
+        $action = "index";
+        $params = [];
 
-            if($route['path'] == $routeElements[$i]) {
-                echo count( $routeElements );
-                echo '<br>';
-                echo $i;
-                $controller = $route['controller'];
+        for($i = 1; $i < count($routeElements); $i++) {
+            foreach($routes as $route) {
+                if($route['path'] == $routeElements[$i]) {
+                    
+                    $controller = $route['controller'];
+                    
 
-                $action = $route['children'][$routeElements[$i + 1]];
-                // if( count( $routeElements ) <= ($i) ) 
-                $params = findParams($route, $routeElements);               
-                break;
+                    if(count($routeElements) == $i + 1) {
+                        $action = "index";
+                        return [$controller, $action, $params];
+                    }
+
+                    if( !isset($route['children'][$routeElements[$i + 1]]) ) {
+                        throw new NotFound($message = "Page not found", $code = 404, $previous = null);
+                    }
+                    $action = $route['children'][$routeElements[$i + 1]];
+                    
+                    if(is_array($action)) {
+                        $params = findParams($route['children'][$routeElements[$i + 1]], $routeElements, $i + 2);
+                        $action = $action[0];
+                    }
+                    return [$controller, $action, $params];
+                }
             }
         }
+
+        return [$controller, $action, $params];
     }
+    
+    try {
 
 
-
+        list($controller, $action, $params) = findControllerActionParams($routeElements, $routes);
+        
+        
+    } catch (NotFound $th) {
+        $controller = new ExceptionController();
+        return $controller->notFound();
+    }
+    
+    
+    
+    
     if(!$controller) {
-        echo "404";
-        return;
+        $controller = new ExceptionController();
+        return $controller->notFound();
+    }
+    
+    
+    
+    // print_r($params);
+    try {
+        $controller = new $controller();
+        call_user_func_array([$controller, $action], $params);
+
+    } catch (\Throwable $th) {
+        echo $th;
+        $controller = new ExceptionController();
+        return $controller->notFound();
+
     }
 
-
-   $controller = new $controller();
-
-    // il faut trouver un moyen de passer en parametre les params
-
-    // $controller->$action();
-    call_user_func_array([$controller, $action], $params);
+ 
+    // call_user_func_array([$controller, $action], $params);
 
     
 
-    // if(isset($_GET['action'])) {
-
-    //     // il faut retourner l'ur
-    //     // il faut afficher l'url
-    //     // comment recupérer l'url ?
-    //     echo $_SERVER['REQUEST_URI'];
-    //     return;
-
-    //     $articleController = new ArticleController();
-
-    //     return $articleController->index();
-    // }
-    // echo "ngani"
+ 
 ?>

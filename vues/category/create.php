@@ -4,6 +4,7 @@ require "entete.php";
 
 ?>
 <div>
+    create category
 </div>
 
 <?php

@@ -16,12 +16,25 @@ class ArticleController extends Controller {
         ]);
     }
 
+    public function articleCategorie($categorie_id) {
+        $articles = Article::findByCategory($categorie_id);
+
+        $categories = Category::all();
+        
+        $this->view('article/index', [
+            'articles' => $articles,
+            "categories" => $categories,
+        ]);
+    }
+
 
 
     public function show($id) {
         $article = Article::find($id);
         $this->view('article/show', ['article' => $article]);
     }
+
+
 
 
 
@@ -32,13 +45,19 @@ class ArticleController extends Controller {
 
 
 
+
     public function store() {
+
         $titre = $_POST['titre'];
         $contenu = $_POST['contenu'];
-        $categorie = $_POST['categorie'];
+        $categorie_id = $_POST['categorie'];
+
+        $categorie = Category::find($categorie_id);
+
+
         $article = new Article(null, $titre, $contenu, null, null, $categorie);
         $article->save();
-        $this->redirect('article');
+        $this->redirect('/design_pattern/article');
     }
 
 
